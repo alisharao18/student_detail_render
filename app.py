@@ -4,29 +4,31 @@ import os
 
 app = Flask(__name__)
 
+# Get the DATABASE_URL from Render environment variables
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 def get_db_connection():
-    conn = psycopg2.connect(DATABASE_URL)
+    # Always use sslmode='require' on Render
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     return conn
 
 @app.route("/", methods=["GET", "POST"])
 def home():
-    student = None
+    students = []
 
     if request.method == "POST":
-        name = request.form["name"]
+        search_name = request.form.get("name", "").strip()
 
-        conn = get_db_connection()
-        cur = conn.cursor()
+        if search_name:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            # ILIKE allows case-insensitive search and partial matches
+            cur.execute("SELECT * FROM students WHERE name ILIKE %s", (f"%{search_name}%",))
+            students = cur.fetchall()
+            cur.close()
+            conn.close()
 
-        cur.execute("SELECT * FROM students WHERE name=%s", (name,))
-        student = cur.fetchone()
-
-        cur.close()
-        conn.close()
-
-    return render_template("app.html", student=student)
+    return render_template("app.html", students=students)
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
