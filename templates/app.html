@@ -1,27 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Student Search</title>
+    <title>Student Search</title>
 </head>
-
 <body>
 
 <h2>Search Student</h2>
 
 <form method="POST">
-    <input type="text" name="name" placeholder="Enter student name">
+    <input type="text" name="name" placeholder="Enter student name or SAP ID">
     <button type="submit">Search</button>
 </form>
 
 {% if students %}
-<h3>Search Results:</h3>
-<ul>
-{% for s in students %}
-<li>
-SAP ID: {{ s[0] }} | Name: {{ s[1] }} | Roll No: {{ s[2] }} | GPA: {{ s[3] }}
-</li>
-{% endfor %}
-</ul>
+    <h3>Search Results:</h3>
+    <ul>
+    {% for s in students %}
+        <li>
+            SAP ID: {{ s[0] }} | Name: {{ s[1] }} | Roll No: {{ s[2] }} | GPA: {{ s[3] }}
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    {% if request.method == "POST" %}
+        <p>No students found.</p>
+    {% endif %}
 {% endif %}
 
 </body>
